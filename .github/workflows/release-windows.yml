@@ -1,0 +1,78 @@
+# Builds the portable Windows zip when a release is published and uploads it
+# as a release asset. Does not create the release.
+#
+# scripts/package-windows.mjs expects:
+#   WIN_NODE_DIR  — directory that contains node.exe (plus Node's LICENSE, if present)
+#   WIN_FFMPEG_EXE — full path to ffmpeg.exe
+# and shells out to `zip` (Info-ZIP). The zip is written one directory above
+# the repo, as FigurinhaComSom-Windows.zip.
+
+name: Release Windows
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    name: Package portable zip
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download portable Node.js for Windows
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $index = Invoke-RestMethod -Uri 'https://nodejs.org/dist/index.json'
+          $release = $index | Where-Object { $_.version -match '^v22\.' } | Select-Object -First 1
+          if (-not $release) { throw 'No Node.js 22 release found on nodejs.org' }
+          $version = $release.version
+          Write-Host "Bundling $version"
+          $zip = Join-Path $env:RUNNER_TEMP 'node-win.zip'
+          $dest = Join-Path $env:RUNNER_TEMP 'node-win'
+          Invoke-WebRequest -Uri "https://nodejs.org/dist/$version/node-$version-win-x64.zip" -OutFile $zip
+          Expand-Archive -Path $zip -DestinationPath $dest
+          $dir = Join-Path $dest "node-$version-win-x64"
+          if (-not (Test-Path -LiteralPath (Join-Path $dir 'node.exe'))) {
+            throw "node.exe missing in $dir"
+          }
+          Add-Content -Path $env:GITHUB_ENV -Value "WIN_NODE_DIR=$dir"
+
+      - name: Fetch FFmpeg for Windows
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          node scripts/fetch-ffmpeg.mjs
+          $exe = Join-Path (Get-Location) 'node_modules\ffmpeg-static\ffmpeg.exe'
+          if (-not (Test-Path -LiteralPath $exe)) { throw "ffmpeg.exe missing at $exe" }
+          Add-Content -Path $env:GITHUB_ENV -Value "WIN_FFMPEG_EXE=$exe"
+
+      - name: Package and upload
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          choco install zip -y --no-progress
+          $env:Path = 'C:\ProgramData\chocolatey\bin;' + $env:Path
+          if (-not (Get-Command zip.exe -ErrorAction SilentlyContinue)) {
+            throw 'zip.exe is not on PATH (package-windows.mjs needs Info-ZIP)'
+          }
+          npm run package-windows
+          $zip = Join-Path (Split-Path -Parent (Get-Location)) 'FigurinhaComSom-Windows.zip'
+          if (-not (Test-Path -LiteralPath $zip)) { throw "Zip not found at $zip" }
+          gh release upload "${{ github.event.release.tag_name }}" $zip --clobber
