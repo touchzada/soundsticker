@@ -25,9 +25,6 @@ SoundSticker é um aplicativo local com interface no navegador. Você conecta o 
 
 Não precisa instalar Node nem FFmpeg se você usar o pacote portátil do Windows. Pra rodar pelo código-fonte, precisa do Node 20+ e do FFmpeg (baixado automaticamente pelo script de setup).
 
-### Site
-
-A página do projeto fica em <https://touchzada.github.io/soundsticker/>. Ela entra no ar quando o GitHub Pages estiver habilitado: **Settings → Pages → Deploy from branch `main` / `docs`**.
 
 ### Aviso importante
 
