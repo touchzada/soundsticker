@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#07110c" />
+  <title>SoundSticker — Figurinha com som</title>
+  <meta name="author" content="touchzada" />
+  <meta name="description" content="SoundSticker (Figurinha com som): app local para criar e enviar figurinhas com áudio no WhatsApp. WebP 512×512 + OGG Opus. Local app for WhatsApp stickers with sound. Cliente não oficial — use um número reserva. Unofficial client — use a spare number." />
+  <link rel="canonical" href="https://touchzada.github.io/soundsticker/" />
+  <link rel="author" href="https://x.com/touchzada" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="SoundSticker" />
+  <meta property="og:locale" content="pt_BR" />
+  <meta property="og:locale:alternate" content="en_US" />
+  <meta property="og:url" content="https://touchzada.github.io/soundsticker/" />
+  <meta property="og:title" content="SoundSticker — Figurinha com som" />
+  <meta property="og:description" content="App local para criar figurinhas com som no WhatsApp. WebP animado 512×512 + OGG Opus. Cliente não oficial — use um número reserva." />
+  <meta property="og:image" content="https://touchzada.github.io/soundsticker/screens/02-preparada.png" />
+  <meta property="og:image:width" content="1440" />
+  <meta property="og:image:height" content="1829" />
+  <meta property="og:image:alt" content="SoundSticker com a figurinha pronta e a prévia do áudio" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="SoundSticker — Figurinha com som" />
+  <meta name="twitter:description" content="Figurinhas com som no WhatsApp, no seu computador. Cliente não oficial — use um número reserva." />
+  <meta name="twitter:image" content="https://touchzada.github.io/soundsticker/screens/02-preparada.png" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect rx='8' width='32' height='32' fill='%2325d366'/%3E%3Cpath d='M8 18c4-8 12-8 16 0' fill='none' stroke='%230b1410' stroke-width='2.4' stroke-linecap='round'/%3E%3Ccircle cx='12' cy='20' r='1.6' fill='%230b1410'/%3E%3Ccircle cx='20' cy='20' r='1.6' fill='%230b1410'/%3E%3C/svg%3E" />
+  <script>
+    (function () {
+      var lang = "pt";
+      try {
+        var q = new URLSearchParams(location.search).get("lang");
+        var saved = localStorage.getItem("soundsticker-lang");
+        if (q === "pt" || q === "en") lang = q;
+        else if (saved === "pt" || saved === "en") lang = saved;
+        else {
+          var n = (navigator.languages && navigator.languages[0]) || navigator.language || "pt";
+          lang = String(n).toLowerCase().indexOf("en") === 0 ? "en" : "pt";
+        }
+      } catch (e) {}
+      var root = document.documentElement;
+      root.setAttribute("data-lang", lang);
+      root.lang = lang === "en" ? "en" : "pt-BR";
+      document.title = lang === "en" ? "SoundSticker — Stickers with sound" : "SoundSticker — Figurinha com som";
+    })();
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    :root {
+      --bg: #07110c;
+      --ink: #e9f7ef;
+      --muted: #8aa396;
+      --card: rgba(14, 28, 22, 0.62);
+      --card-border: rgba(37, 211, 102, 0.16);
+      --line: rgba(255, 255, 255, 0.08);
+      --green: #25d366;
+      --green-2: #00e5a0;
+      --green-ink: #07110c;
+      --warn-bg: rgba(245, 197, 66, 0.12);
+      --warn-ink: #f8de8a;
+      --shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+      --radius: 22px;
+      color-scheme: dark;
+    }
+    html { scroll-behavior: smooth; }
+    html, body { margin: 0; padding: 0; overflow-x: clip; }
+    body { overflow-wrap: break-word; }
+    body {
+      font-family: "Segoe UI", "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.55;
+      min-height: 100%;
+    }
+    html[data-lang="pt"] .t-en,
+    html[data-lang="en"] .t-pt,
+    html:not([data-lang]) .t-en { display: none !important; }
+    img { max-width: 100%; }
+    a { color: var(--green-2); }
+    :focus-visible {
+      outline: 2px solid var(--green);
+      outline-offset: 3px;
+    }
+    ::selection { background: rgba(37, 211, 102, 0.35); color: #fff; }
+
+    .bg {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      z-index: -1;
+      overflow: hidden;
+      background:
+        radial-gradient(1200px 700px at 8% -10%, rgba(37, 211, 102, 0.2), transparent 55%),
+        radial-gradient(900px 640px at 110% 8%, rgba(0, 180, 140, 0.18), transparent 52%),
+        linear-gradient(165deg, #0c1f16 0%, #07110c 42%, #050c09 100%);
+      background-size: 100% 100%, 100% 100%, 160% 160%;
+      animation: shade 22s ease-in-out infinite alternate;
+    }
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(40px);
+      opacity: 0.55;
+      animation: drift 22s ease-in-out infinite alternate;
+    }
+    .orb-a { width: 440px; height: 440px; left: -140px; top: -90px; background: #1fa855; }
+    .orb-b { width: 380px; height: 380px; right: -100px; top: 18%; background: #0e7a5a; animation-duration: 28s; animation-delay: -6s; }
+    .orb-c { width: 520px; height: 520px; left: 28%; bottom: -240px; background: #145c3a; animation-duration: 32s; animation-delay: -12s; }
+    .grid-fade {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse at center, black 15%, transparent 75%);
+      opacity: 0.55;
+    }
+    @keyframes drift {
+      from { transform: translate3d(0, 0, 0) scale(1); }
+      to { transform: translate3d(36px, 26px, 0) scale(1.1); }
+    }
+    @keyframes shade {
+      from { background-position: 0 0, 0 0, 0% 0%; }
+      to { background-position: 0 0, 0 0, 80% 40%; }
+    }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: none; }
+    }
+    @keyframes bar {
+      0%, 100% { transform: scaleY(0.35); }
+      50% { transform: scaleY(1); }
+    }
+
+    .wrap { width: min(1120px, calc(100% - 32px)); margin: 0 auto; }
+    .top {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(7, 17, 12, 0.78);
+      backdrop-filter: blur(18px) saturate(1.2);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .top-inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 16px;
+      padding: 12px 0;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--ink);
+      text-decoration: none;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-right: auto;
+    }
+    .brand svg { filter: drop-shadow(0 0 12px rgba(37, 211, 102, 0.4)); display: block; }
+    .brand span { font-size: 1.05rem; }
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      order: 3;
+      flex-basis: 100%;
+    }
+    .nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 6px 10px;
+      border-radius: 999px;
+    }
+    .nav a:hover { color: var(--ink); background: rgba(255, 255, 255, 0.05); }
+    .lang {
+      display: inline-flex;
+      padding: 3px;
+      border-radius: 999px;
+      border: 1px solid rgba(37, 211, 102, 0.28);
+      background: rgba(0, 0, 0, 0.28);
+      margin-left: auto;
+    }
+    .lang button {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font: inherit;
+      font-weight: 800;
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      padding: 6px 11px;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+    .lang button[aria-pressed="true"] {
+      background: linear-gradient(180deg, #3be07a, var(--green));
+      color: var(--green-ink);
+    }
+
+    main { padding-bottom: 28px; }
+    section { scroll-margin-top: 92px; padding: 28px 0; }
+    .hero { padding-top: 34px; }
+    .hero-grid {
+      display: grid;
+      gap: 28px;
+      align-items: center;
+    }
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 0.72rem;
+      color: var(--green-2);
+      margin: 0 0 8px;
+      font-weight: 700;
+    }
+    h1 {
+      font-size: clamp(2.3rem, 7vw, 4.3rem);
+      line-height: 0.98;
+      letter-spacing: -0.045em;
+      margin: 0;
+      font-weight: 700;
+    }
+    h2 {
+      font-size: clamp(1.45rem, 3vw, 2rem);
+      letter-spacing: -0.03em;
+      margin: 0 0 10px;
+      line-height: 1.15;
+    }
+    h3 { margin: 0 0 6px; font-size: 1.05rem; letter-spacing: -0.02em; }
+    .lead { color: var(--muted); font-size: 1.08rem; max-width: 46ch; margin: 14px 0 0; }
+    .section-lead { color: var(--muted); max-width: 62ch; margin: 0 0 18px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-weight: 700;
+      border: 1px solid transparent;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+    .btn svg { flex: 0 0 auto; }
+    .btn-primary {
+      background: linear-gradient(180deg, #3be07a, var(--green));
+      color: var(--green-ink);
+      box-shadow: 0 8px 22px rgba(37, 211, 102, 0.24);
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 12px 28px rgba(37, 211, 102, 0.34); }
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--ink);
+      border-color: var(--line);
+    }
+    .btn-ghost:hover { background: rgba(255, 255, 255, 0.08); }
+    .hero-warn {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      margin-top: 18px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: var(--warn-bg);
+      color: var(--warn-ink);
+      border: 1px solid rgba(245, 197, 66, 0.24);
+      max-width: 58ch;
+      font-size: 0.95rem;
+    }
+    .hero-warn a { color: #ffe7a3; font-weight: 700; }
+    .wave {
+      display: inline-flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 16px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+    .wave i {
+      display: block;
+      width: 3px;
+      height: 16px;
+      border-radius: 99px;
+      background: var(--green);
+      transform-origin: center bottom;
+      animation: bar 1.15s ease-in-out infinite;
+    }
+    .wave i:nth-child(2) { animation-delay: 0.12s; }
+    .wave i:nth-child(3) { animation-delay: 0.24s; }
+    .wave i:nth-child(4) { animation-delay: 0.08s; }
+    .wave i:nth-child(5) { animation-delay: 0.2s; }
+
+    .hero-visual { position: relative; }
+    .hero-visual::before {
+      content: "";
+      position: absolute;
+      inset: 8% -6%;
+      background: radial-gradient(circle, rgba(37, 211, 102, 0.28), transparent 68%);
+      filter: blur(18px);
+      z-index: -1;
+    }
+    .frame {
+      border-radius: 22px;
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+      box-shadow: var(--shadow), 0 0 0 1px rgba(37, 211, 102, 0.06);
+      background: #07110c;
+    }
+    .frame img { display: block; width: 100%; height: auto; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .chip {
+      border-radius: 999px;
+      padding: 6px 11px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--ink);
+      background: rgba(7, 17, 12, 0.72);
+      border: 1px solid rgba(37, 211, 102, 0.28);
+      backdrop-filter: blur(10px);
+    }
+
+    .card, .feature, details, .shot-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px) saturate(1.2);
+    }
+    .card, .feature, .shot-card { animation: rise 0.55s ease both; }
+    .grid-3, .grid-2, .features, .gallery { margin-top: 4px; }
+    .grid-3, .grid-2, .features { display: grid; gap: 14px; }
+    .card { padding: 20px; }
+    .card p, .feature p { color: var(--muted); margin: 0; }
+    .idx {
+      display: inline-grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--green);
+      color: var(--green-ink);
+      font-size: 0.8rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+    .note {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px dashed rgba(37, 211, 102, 0.28);
+      color: var(--muted);
+      background: rgba(37, 211, 102, 0.05);
+    }
+    .note code, p code, li code {
+      font-family: ui-monospace, "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: 0.88em;
+      color: var(--green-2);
+    }
+
+    .swipe-hint { color: var(--muted); font-size: 0.85rem; margin: 0 0 10px; }
+    .gallery {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(260px, 86%);
+      gap: 14px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      padding-bottom: 8px;
+    }
+    .shot-card {
+      margin: 0;
+      scroll-snap-align: start;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .shot {
+      display: block;
+      padding: 0;
+      border: 0;
+      background: #050c09;
+      cursor: zoom-in;
+      width: 100%;
+    }
+    .shot img { display: block; width: 100%; height: auto; }
+    figcaption {
+      padding: 12px 14px 14px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .steps { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 10px; }
+    .steps li { display: flex; gap: 12px; align-items: flex-start; }
+    .num {
+      flex: 0 0 auto;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: rgba(37, 211, 102, 0.16);
+      color: var(--green);
+      font-weight: 800;
+      font-size: 0.82rem;
+    }
+    .snippet { position: relative; margin-top: 14px; }
+    pre {
+      margin: 0;
+      padding: 14px 92px 14px 16px;
+      border-radius: 14px;
+      background: rgba(0, 0, 0, 0.38);
+      border: 1px solid var(--line);
+      overflow-x: auto;
+      font-family: ui-monospace, "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: 0.92rem;
+      color: var(--green-2);
+    }
+    code { font-family: inherit; }
+    .copy {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font: inherit;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .copy .done { display: none; }
+    .copy.is-copied .idle { display: none; }
+    .copy.is-copied .done { display: inline; }
+    .hint { color: var(--muted); font-size: 0.92rem; margin: 12px 0 0; }
+
+    .feature { padding: 16px; }
+    .icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: rgba(37, 211, 102, 0.12);
+      color: var(--green);
+      margin-bottom: 10px;
+    }
+
+    .warn {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      background: var(--warn-bg);
+      color: var(--warn-ink);
+      border: 1px solid rgba(245, 197, 66, 0.28);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .warn p { margin: 0 0 10px; }
+    .warn p:last-child { margin: 0; }
+    .warn strong { color: #ffe7a3; }
+    .warn svg { flex: 0 0 auto; margin-top: 2px; }
+
+    .faq { display: grid; gap: 10px; }
+    details { padding: 0 16px; }
+    summary {
+      cursor: pointer;
+      padding: 14px 0;
+      font-weight: 700;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary .chev { flex: 0 0 auto; color: var(--green); transition: transform 0.2s ease; }
+    details[open] summary .chev { transform: rotate(180deg); }
+    details p { margin: 0 0 14px; color: var(--muted); }
+
+    .footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 28px 0 36px;
+      color: var(--muted);
+    }
+    .footer-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 18px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .credit {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--ink);
+      text-decoration: none;
+      border: 1px solid var(--card-border);
+      background: rgba(37, 211, 102, 0.08);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-weight: 700;
+    }
+    .credit:hover {
+      background: rgba(37, 211, 102, 0.16);
+      border-color: rgba(37, 211, 102, 0.4);
+    }
+    .footer-links { display: flex; flex-wrap: wrap; gap: 8px 14px; }
+    .footer-links a { color: var(--muted); text-decoration: none; font-weight: 600; }
+    .footer-links a:hover { color: var(--ink); }
+    .fine { margin: 14px 0 0; font-size: 0.88rem; }
+
+    dialog {
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 12px;
+      background: #0c1a14;
+      color: var(--ink);
+      max-width: min(960px, calc(100vw - 24px));
+      box-shadow: var(--shadow);
+    }
+    dialog::backdrop { background: rgba(0, 0, 0, 0.72); }
+    dialog img { display: block; width: 100%; height: auto; border-radius: 12px; }
+    .lb-bar { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 8px; }
+    .lb-close {
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    @media (min-width: 800px) {
+      .grid-2 { grid-template-columns: 1fr 1fr; }
+      .features { grid-template-columns: 1fr 1fr; }
+      .nav { order: 0; flex-basis: auto; }
+      section { padding: 42px 0; }
+      .hero { padding-top: 48px; }
+    }
+    @media (min-width: 980px) {
+      .hero-grid { grid-template-columns: 1.05fr 0.95fr; gap: 42px; }
+      .grid-3, .features { grid-template-columns: repeat(3, 1fr); }
+      .gallery {
+        grid-auto-flow: row;
+        grid-template-columns: repeat(3, 1fr);
+        overflow: visible;
+      }
+      .swipe-hint { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+      .orb, .bg, .wave i { animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg" aria-hidden="true">
+    <span class="orb orb-a"></span>
+    <span class="orb orb-b"></span>
+    <span class="orb orb-c"></span>
+    <span class="grid-fade"></span>
+  </div>
+
+  <header class="top">
+    <div class="wrap top-inner">
+      <a class="brand" href="#topo">
+        <svg viewBox="0 0 32 32" width="32" height="32" aria-hidden="true">
+          <rect rx="9" width="32" height="32" fill="#25d366"/>
+          <path d="M8 18c4-8 12-8 16 0" fill="none" stroke="#07110c" stroke-width="2.4" stroke-linecap="round"/>
+          <circle cx="12" cy="20.2" r="1.7" fill="#07110c"/>
+          <circle cx="20" cy="20.2" r="1.7" fill="#07110c"/>
+        </svg>
+        <span>SoundSticker</span>
+      </a>
+      <nav class="nav" aria-label="Seções">
+        <a href="#faz"><span class="t-pt">O que faz</span><span class="t-en">What it does</span></a>
+        <a href="#telas"><span class="t-pt">Telas</span><span class="t-en">Screens</span></a>
+        <a href="#usar"><span class="t-pt">Como usar</span><span class="t-en">How to use</span></a>
+        <a href="#recursos"><span class="t-pt">Recursos</span><span class="t-en">Features</span></a>
+        <a href="#aviso"><span class="t-pt">Aviso</span><span class="t-en">Warning</span></a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <div class="lang" role="group" aria-label="Idioma">
+        <button type="button" id="btn-lang-pt" data-set-lang="pt" aria-pressed="true" aria-label="Português">PT</button>
+        <button type="button" id="btn-lang-en" data-set-lang="en" aria-pressed="false" aria-label="English">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="topo">
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <p class="eyebrow">SoundSticker
+            <span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+          </p>
+          <h1 id="hero-title">
+            <span class="t-pt">Figurinha com som</span>
+            <span class="t-en">Stickers with sound</span>
+          </h1>
+          <p class="lead">
+            <span class="t-pt">Transforme um vídeo em figurinha animada com áudio e envie pelo WhatsApp. A conversão acontece no seu computador: WebP 512×512 e OGG Opus, com até 10 segundos.</span>
+            <span class="t-en">Turn a video into an animated sticker with audio and send it on WhatsApp. Conversion happens on your computer: 512×512 WebP and OGG Opus, up to 10 seconds.</span>
+          </p>
+          <div class="actions">
+            <a class="btn btn-primary" href="https://github.com/touchzada/soundsticker" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.7 7.7 0 0 1 8 3.87a7.7 7.7 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+              <span class="t-pt">Código no GitHub</span>
+              <span class="t-en">Source on GitHub</span>
+            </a>
+            <a class="btn btn-ghost" href="https://github.com/touchzada/soundsticker/releases" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 3a1 1 0 0 1 1 1v9.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.42L11 13.59V4a1 1 0 0 1 1-1zM5 19a1 1 0 1 0 0 2h14a1 1 0 1 0 0-2H5z"/></svg>
+              <span class="t-pt">Baixar para Windows</span>
+              <span class="t-en">Download for Windows</span>
+            </a>
+          </div>
+          <aside class="hero-warn">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 3.2 2.8 20.2h18.4L12 3.2zm0 5.3c.6 0 1 .5 1 1.1v4.2c0 .6-.4 1.1-1 1.1s-1-.5-1-1.1V9.6c0-.6.4-1.1 1-1.1zm0 8.1a1.15 1.15 0 1 1 0 2.3 1.15 1.15 0 0 1 0-2.3z"/></svg>
+            <div>
+              <span class="t-pt">Cliente não oficial: pode banir o número. Use um número reserva.</span>
+              <span class="t-en">Unofficial client: it can get the number banned. Use a spare number.</span>
+              <a href="#aviso"><span class="t-pt">Leia o aviso</span><span class="t-en">Read the warning</span></a>
+            </div>
+          </aside>
+        </div>
+        <div class="hero-visual">
+          <div class="frame">
+            <img src="screens/01-inicial.png" width="1440" height="1600" alt="Tela inicial do SoundSticker, com as etapas conectar, preparar e enviar." data-alt-pt="Tela inicial do SoundSticker, com as etapas conectar, preparar e enviar." data-alt-en="SoundSticker home screen, with connect, prepare, and send." />
+          </div>
+          <div class="chips" aria-hidden="true">
+            <span class="chip">512×512 WebP</span>
+            <span class="chip">OGG Opus · 10s</span>
+            <span class="chip"><span class="t-pt">só neste PC</span><span class="t-en">this PC only</span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="faz">
+      <div class="wrap">
+        <p class="eyebrow"><span class="t-pt">Como funciona</span><span class="t-en">How it works</span></p>
+        <h2><span class="t-pt">O que o SoundSticker faz</span><span class="t-en">What SoundSticker does</span></h2>
+        <p class="section-lead">
+          <span class="t-pt">Três passos, sem servidor na nuvem. O WhatsApp só entra na hora de conectar e de enviar.</span>
+          <span class="t-en">Three steps, and no cloud server. WhatsApp is only involved when you connect and when you send.</span>
+        </p>
+        <div class="grid-3">
+          <article class="card">
+            <span class="idx">1</span>
+            <h3><span class="t-pt">Conectar</span><span class="t-en">Connect</span></h3>
+            <p><span class="t-pt">Mostre o QR ou gere um código de emparelhamento. A sessão fica só neste computador, na pasta auth/.</span><span class="t-en">Show a QR code or generate a pairing code. The session stays on this computer, in the auth/ folder.</span></p>
+          </article>
+          <article class="card">
+            <span class="idx">2</span>
+            <h3><span class="t-pt">Preparar</span><span class="t-en">Prepare</span></h3>
+            <p><span class="t-pt">Escolha um vídeo ou uma imagem. O app gera a figurinha em 512×512 e o áudio em OGG Opus. Se o vídeo não tiver som, anexe um áudio.</span><span class="t-en">Pick a video or an image. The app builds a 512×512 sticker and OGG Opus audio. If the video has no sound, attach an audio file.</span></p>
+          </article>
+          <article class="card">
+            <span class="idx">3</span>
+            <h3><span class="t-pt">Enviar</span><span class="t-en">Send</span></h3>
+            <p><span class="t-pt">Ouça a prévia e envie para você mesmo ou para outro número. Se quiser comparar, mande também uma cópia muda.</span><span class="t-en">Play the preview, then send it to yourself or to another number. To compare, you can also send a silent copy.</span></p>
+          </article>
+        </div>
+        <p class="note">
+          <span class="t-pt">O som vai no campo <code>stickerMessage.audioMessage</code>. Não é um áudio comum e não é uma figurinha muda.</span>
+          <span class="t-en">The sound is embedded in <code>stickerMessage.audioMessage</code>. It is not a regular voice note, and it is not a silent sticker.</span>
+        </p>
+      </div>
+    </section>
+
+    <section id="telas">
+      <div class="wrap">
+        <p class="eyebrow"><span class="t-pt">Interface</span><span class="t-en">Interface</span></p>
+        <h2><span class="t-pt">As três telas</span><span class="t-en">The three screens</span></h2>
+        <p class="section-lead">
+          <span class="t-pt">Tema escuro, verde do WhatsApp e cards de vidro. Clique numa captura para ver inteira.</span>
+          <span class="t-en">Dark theme, WhatsApp green, and glass cards. Click a shot to open it full size.</span>
+        </p>
+        <p class="swipe-hint"><span class="t-pt">Deslize para o lado.</span><span class="t-en">Swipe sideways.</span></p>
+        <div class="gallery" tabindex="0">
+          <figure class="shot-card">
+            <button type="button" class="shot" data-full="screens/01-inicial.png">
+              <img src="screens/01-inicial.png" width="1440" height="1600" alt="Tela inicial: conectar, preparar e enviar." data-alt-pt="Tela inicial: conectar, preparar e enviar." data-alt-en="Home screen: connect, prepare, and send." />
+            </button>
+            <figcaption><span class="t-pt">Início — conectar, preparar e enviar</span><span class="t-en">Home — connect, prepare, and send</span></figcaption>
+          </figure>
+          <figure class="shot-card">
+            <button type="button" class="shot" data-full="screens/02-preparada.png">
+              <img src="screens/02-preparada.png" width="1440" height="1829" alt="Figurinha pronta, com prévia e botão de ouvir o áudio." data-alt-pt="Figurinha pronta, com prévia e botão de ouvir o áudio." data-alt-en="Sticker ready, with a preview and a button to play the audio." />
+            </button>
+            <figcaption><span class="t-pt">Figurinha pronta, com prévia e áudio</span><span class="t-en">Sticker ready, with preview and audio</span></figcaption>
+          </figure>
+          <figure class="shot-card">
+            <button type="button" class="shot" data-full="screens/03-sucesso.png">
+              <img src="screens/03-sucesso.png" width="1440" height="1867" alt="Envio concluído para o próprio número." data-alt-pt="Envio concluído para o próprio número." data-alt-en="Sticker sent to yourself." />
+            </button>
+            <figcaption><span class="t-pt">Enviada para você mesmo</span><span class="t-en">Sent to yourself</span></figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section id="usar">
+      <div class="wrap">
+        <p class="eyebrow"><span class="t-pt">Começar</span><span class="t-en">Get started</span></p>
+        <h2><span class="t-pt">Como usar</span><span class="t-en">How to use</span></h2>
+        <p class="section-lead">
+          <span class="t-pt">No Windows, o zip portátil basta. Nos outros sistemas, rode a partir do código.</span>
+          <span class="t-en">On Windows, the portable zip is enough. Everywhere else, run it from source.</span>
+        </p>
+        <div class="grid-2">
+          <article class="card">
+            <h3><span class="t-pt">Windows, zip portátil</span><span class="t-en">Windows, portable zip</span></h3>
+            <p><span class="t-pt">Não precisa instalar Node nem FFmpeg.</span><span class="t-en">No need to install Node or FFmpeg.</span></p>
+            <ol class="steps">
+              <li><span class="num">1</span><span><span class="t-pt">Extraia o zip baixado em Releases.</span><span class="t-en">Extract the zip from Releases.</span></span></li>
+              <li><span class="num">2</span><span><span class="t-pt">Execute <code>Iniciar.bat</code>.</span><span class="t-en">Run <code>Iniciar.bat</code>.</span></span></li>
+              <li><span class="num">3</span><span><span class="t-pt">Escaneie o QR com um número reserva.</span><span class="t-en">Scan the QR code with a spare number.</span></span></li>
+              <li><span class="num">4</span><span><span class="t-pt">Escolha um vídeo.</span><span class="t-en">Choose a video.</span></span></li>
+              <li><span class="num">5</span><span><span class="t-pt">Envie a figurinha.</span><span class="t-en">Send the sticker.</span></span></li>
+            </ol>
+            <p class="hint">
+              <span class="t-pt">O navegador abre em <a href="http://127.0.0.1:3847">http://127.0.0.1:3847</a>. O arquivo <code>FigurinhaComSom-Windows.zip</code> entra em <a href="https://github.com/touchzada/soundsticker/releases">Releases</a> quando uma versão é publicada.</span>
+              <span class="t-en">The browser opens at <a href="http://127.0.0.1:3847">http://127.0.0.1:3847</a>. <code>FigurinhaComSom-Windows.zip</code> is attached to <a href="https://github.com/touchzada/soundsticker/releases">Releases</a> when a version is published.</span>
+            </p>
+          </article>
+          <article class="card">
+            <h3><span class="t-pt">A partir do código</span><span class="t-en">From source</span></h3>
+            <p><span class="t-pt">Precisa do Node.js 20 ou superior.</span><span class="t-en">You need Node.js 20 or newer.</span></p>
+            <div class="snippet">
+              <pre><code id="cmd-src">npm install
+npm start</code></pre>
+              <button type="button" class="copy" data-copy="cmd-src">
+                <span class="idle"><span class="t-pt">Copiar</span><span class="t-en">Copy</span></span>
+                <span class="done"><span class="t-pt">Copiado</span><span class="t-en">Copied</span></span>
+              </button>
+            </div>
+            <p class="hint">
+              <span class="t-pt">Abra <a href="http://127.0.0.1:3847">http://127.0.0.1:3847</a>. Se o FFmpeg não tiver sido baixado na instalação, rode <code>npm run setup</code>.</span>
+              <span class="t-en">Open <a href="http://127.0.0.1:3847">http://127.0.0.1:3847</a>. If FFmpeg was not downloaded with the install, run <code>npm run setup</code>.</span>
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="recursos">
+      <div class="wrap">
+        <p class="eyebrow"><span class="t-pt">Detalhes</span><span class="t-en">Details</span></p>
+        <h2><span class="t-pt">Recursos</span><span class="t-en">Features</span></h2>
+        <div class="features">
+          <article class="feature">
+            <div class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm1 2v10h14V7H5zm3.2 8.2 2.4-3 1.7 2 2.3-3.2 3.2 4.2H8.2z"/></svg></div>
+            <h3>WebP 512×512</h3>
+            <p><span class="t-pt">Animada até 500 KB. Estática até 100 KB. Fundo preenchido para o quadrado do WhatsApp.</span><span class="t-en">Animated up to 500 KB. Static up to 100 KB. Padded to the WhatsApp square.</span></p>
+          </article>
+          <article class="feature">
+            <div class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M9 4v11.3A3.5 3.5 0 1 0 11 18V9h6V4H9zm0 14.5A1.5 1.5 0 1 1 10.5 17 1.5 1.5 0 0 1 9 18.5z"/></svg></div>
+            <h3>OGG Opus</h3>
+            <p><span class="t-pt">Mono, 48 kHz, até 10 segundos. O som do vídeo entra sozinho; um áudio separado é opcional.</span><span class="t-en">Mono, 48 kHz, up to 10 seconds. Video audio is reused; a separate sound file is optional.</span></p>
+          </article>
+          <article class="feature">
+            <div class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M4 4h7v7H4V4zm9 0h7v7h-7V4zM4 13h7v7H4v-7zm11 2h2v2h-2v-2zm2-2h2v2h-2v-2zm-2 4h2v2h-2v-2zm4 0h2v2h-2v-2z"/></svg></div>
+            <h3><span class="t-pt">QR ou código</span><span class="t-en">QR or code</span></h3>
+            <p><span class="t-pt">Escaneie o QR ou peça um código de emparelhamento com DDI + número.</span><span class="t-en">Scan the QR code, or request a pairing code with country code plus number.</span></p>
+          </article>
+          <article class="feature">
+            <div class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M8 5.5v13l11-6.5L8 5.5z"/></svg></div>
+            <h3><span class="t-pt">Prévia com som</span><span class="t-en">Preview with sound</span></h3>
+            <p><span class="t-pt">Veja a figurinha e aperte Ouvir antes de mandar.</span><span class="t-en">See the sticker and press Play before you send it.</span></p>
+          </article>
+          <article class="feature">
+            <div class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 8V7a3 3 0 0 1 6 0v3H9z"/></svg></div>
+            <h3><span class="t-pt">Sessão local</span><span class="t-en">Local session</span></h3>
+            <p><span class="t-pt">A pasta auth/ fica no seu computador. Desconectar apaga esses dados.</span><span class="t-en">The auth/ folder stays on your computer. Disconnect deletes that data.</span></p>
+          </article>
+          <article class="feature">
+            <div class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M7 3h8l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm7 1.5V9h4.5L14 4.5zM8 13h8v2H8v-2zm0 4h5v2H8v-2z"/></svg></div>
+            <h3><span class="t-pt">Zip do Windows</span><span class="t-en">Windows zip</span></h3>
+            <p><span class="t-pt">O pacote leva Node e FFmpeg. Extraia e abra Iniciar.bat.</span><span class="t-en">The package bundles Node and FFmpeg. Extract it and open Iniciar.bat.</span></p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="aviso">
+      <div class="wrap">
+        <p class="eyebrow"><span class="t-pt">Risco</span><span class="t-en">Risk</span></p>
+        <h2><span class="t-pt">Aviso importante</span><span class="t-en">Important warning</span></h2>
+        <div class="warn">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M12 3.2 2.8 20.2h18.4L12 3.2zm0 5.3c.6 0 1 .5 1 1.1v4.2c0 .6-.4 1.1-1 1.1s-1-.5-1-1.1V9.6c0-.6.4-1.1 1-1.1zm0 8.1a1.15 1.15 0 1 1 0 2.3 1.15 1.15 0 0 1 0-2.3z"/></svg>
+          <div>
+            <p>
+              <span class="t-pt"><strong>Cliente não oficial.</strong> O SoundSticker usa o <code>plogme</code> (um fork do Baileys) para falar com o WhatsApp Web. Isso fica fora dos termos de uso da Meta e <strong>pode levar ao banimento, à restrição ou à desconexão do número</strong>.</span>
+              <span class="t-en"><strong>Unofficial client.</strong> SoundSticker uses <code>plogme</code> (a Baileys fork) to talk to WhatsApp Web. That sits outside Meta's terms of service and <strong>can get the number banned, restricted, or disconnected</strong>.</span>
+            </p>
+            <p>
+              <span class="t-pt">Use um <strong>número reserva</strong>. Não conecte a conta principal, profissional ou de negócio. A sessão fica só no seu computador; o botão Desconectar apaga esses dados. Figurinhas com som são um recurso recente, e o formato da mensagem pode mudar.</span>
+              <span class="t-en">Use a <strong>spare number</strong>. Do not connect your main, work, or business account. The session stays on your computer; Disconnect deletes that data. Stickers with sound are a recent feature, and the message format can change.</span>
+            </p>
+            <p>
+              <span class="t-pt"><strong>Sem afiliação.</strong> SoundSticker não é afiliado ao WhatsApp nem à Meta. Use por sua conta e risco.</span>
+              <span class="t-en"><strong>Not affiliated.</strong> SoundSticker is not affiliated with WhatsApp or Meta. Use at your own risk.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq">
+      <div class="wrap">
+        <p class="eyebrow">FAQ</p>
+        <h2><span class="t-pt">Perguntas frequentes</span><span class="t-en">Common questions</span></h2>
+        <div class="faq">
+          <details>
+            <summary>
+              <span class="t-pt">Precisa de internet o tempo todo?</span>
+              <span class="t-en">Does it need the internet the whole time?</span>
+              <svg class="chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M6.7 9.3a1 1 0 0 1 1.4 0L12 13.2l3.9-3.9a1 1 0 1 1 1.4 1.4l-4.6 4.6a1 1 0 0 1-1.4 0L6.7 10.7a1 1 0 0 1 0-1.4z"/></svg>
+            </summary>
+            <p><span class="t-pt">Não. A conversão do vídeo é local. A internet só entra para conectar a sessão e para enviar a figurinha. O app precisa estar aberto nesses momentos.</span><span class="t-en">No. Video conversion is local. The internet is only used to link the session and to send the sticker. The app needs to stay open while you do that.</span></p>
+          </details>
+          <details>
+            <summary>
+              <span class="t-pt">Meu número pode ser banido?</span>
+              <span class="t-en">Can my number be banned?</span>
+              <svg class="chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M6.7 9.3a1 1 0 0 1 1.4 0L12 13.2l3.9-3.9a1 1 0 1 1 1.4 1.4l-4.6 4.6a1 1 0 0 1-1.4 0L6.7 10.7a1 1 0 0 1 0-1.4z"/></svg>
+            </summary>
+            <p><span class="t-pt">Pode. O cliente não é oficial. Use um número reserva e clique em Desconectar quando terminar.</span><span class="t-en">Yes. The client is unofficial. Use a spare number and click Disconnect when you are done.</span></p>
+          </details>
+          <details>
+            <summary>
+              <span class="t-pt">Onde a sessão fica salva?</span>
+              <span class="t-en">Where is the session stored?</span>
+              <svg class="chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M6.7 9.3a1 1 0 0 1 1.4 0L12 13.2l3.9-3.9a1 1 0 1 1 1.4 1.4l-4.6 4.6a1 1 0 0 1-1.4 0L6.7 10.7a1 1 0 0 1 0-1.4z"/></svg>
+            </summary>
+            <p><span class="t-pt">Na pasta <code>auth/</code>, neste computador. O SoundSticker não tem servidor próprio. Desconectar apaga essa pasta.</span><span class="t-en">In the <code>auth/</code> folder on this computer. SoundSticker has no server of its own. Disconnect deletes that folder.</span></p>
+          </details>
+          <details>
+            <summary>
+              <span class="t-pt">Qual formato sai da conversão?</span>
+              <span class="t-en">What format comes out?</span>
+              <svg class="chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M6.7 9.3a1 1 0 0 1 1.4 0L12 13.2l3.9-3.9a1 1 0 1 1 1.4 1.4l-4.6 4.6a1 1 0 0 1-1.4 0L6.7 10.7a1 1 0 0 1 0-1.4z"/></svg>
+            </summary>
+            <p><span class="t-pt">WebP 512×512 (animado até 500 KB, estático até 100 KB) e áudio OGG Opus mono, 48 kHz, até 10 segundos, no campo <code>stickerMessage.audioMessage</code>.</span><span class="t-en">A 512×512 WebP (animated up to 500 KB, static up to 100 KB) and mono OGG Opus audio, 48 kHz, up to 10 seconds, in <code>stickerMessage.audioMessage</code>.</span></p>
+          </details>
+          <details>
+            <summary>
+              <span class="t-pt">Funciona no macOS e no Linux?</span>
+              <span class="t-en">Does it work on macOS and Linux?</span>
+              <svg class="chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M6.7 9.3a1 1 0 0 1 1.4 0L12 13.2l3.9-3.9a1 1 0 1 1 1.4 1.4l-4.6 4.6a1 1 0 0 1-1.4 0L6.7 10.7a1 1 0 0 1 0-1.4z"/></svg>
+            </summary>
+            <p><span class="t-pt">Sim, a partir do código, com Node.js 20 ou superior. O zip portátil é só para Windows.</span><span class="t-en">Yes, from source, with Node.js 20 or newer. The portable zip is Windows-only.</span></p>
+          </details>
+          <details>
+            <summary>
+              <span class="t-pt">Isso é do WhatsApp?</span>
+              <span class="t-en">Is this from WhatsApp?</span>
+              <svg class="chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M6.7 9.3a1 1 0 0 1 1.4 0L12 13.2l3.9-3.9a1 1 0 1 1 1.4 1.4l-4.6 4.6a1 1 0 0 1-1.4 0L6.7 10.7a1 1 0 0 1 0-1.4z"/></svg>
+            </summary>
+            <p>
+              <span class="t-pt">Não. É um projeto independente, criado por </span>
+              <span class="t-en">No. It is an independent project, created by </span>
+              <a href="https://x.com/touchzada" target="_blank" rel="noopener noreferrer">@touchzada</a><span class="t-pt">, sem afiliação com WhatsApp ou Meta.</span><span class="t-en">, with no affiliation with WhatsApp or Meta.</span>
+            </p>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <div class="footer-row">
+        <a class="credit" href="https://x.com/touchzada" target="_blank" rel="noopener noreferrer me">
+          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.74l7.726-8.835L1.254 2.25H8.08l4.253 5.622L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"/></svg>
+          <span class="t-pt">Criado por @touchzada</span>
+          <span class="t-en">Created by @touchzada</span>
+        </a>
+        <div class="footer-links">
+          <a href="https://github.com/touchzada/soundsticker/blob/main/LICENSE">MIT</a>
+          <a href="https://github.com/touchzada/soundsticker">GitHub</a>
+          <a href="https://github.com/touchzada/soundsticker/releases">Releases</a>
+        </div>
+      </div>
+      <p class="fine">
+        <span class="t-pt">Licença MIT. Não afiliado ao WhatsApp ou à Meta.</span>
+        <span class="t-en">MIT License. Not affiliated with WhatsApp or Meta.</span>
+      </p>
+    </div>
+  </footer>
+
+  <dialog id="lightbox">
+    <div class="lb-bar">
+      <p id="lb-cap" style="margin:0;color:#8aa396"></p>
+      <button type="button" class="lb-close" id="lb-close">
+        <span class="t-pt">Fechar</span><span class="t-en">Close</span>
+      </button>
+    </div>
+    <img id="lb-img" alt="" />
+  </dialog>
+
+  <script>
+    (function () {
+      var root = document.documentElement;
+      var DESC = {
+        pt: "SoundSticker (Figurinha com som): app local para criar e enviar figurinhas com áudio no WhatsApp. WebP 512×512 + OGG Opus. Cliente não oficial — use um número reserva.",
+        en: "SoundSticker: a local app to create and send WhatsApp stickers with audio. 512×512 WebP + OGG Opus. Unofficial client — use a spare number."
+      };
+      function current() {
+        return root.getAttribute("data-lang") === "en" ? "en" : "pt";
+      }
+      function apply(lang, persist) {
+        root.setAttribute("data-lang", lang);
+        root.lang = lang === "en" ? "en" : "pt-BR";
+        document.title = lang === "en" ? "SoundSticker — Stickers with sound" : "SoundSticker — Figurinha com som";
+        var desc = document.querySelector('meta[name="description"]');
+        if (desc) desc.setAttribute("content", DESC[lang]);
+        document.querySelectorAll("[data-alt-pt]").forEach(function (img) {
+          img.alt = lang === "en" ? img.getAttribute("data-alt-en") : img.getAttribute("data-alt-pt");
+        });
+        document.querySelectorAll("[data-set-lang]").forEach(function (btn) {
+          btn.setAttribute("aria-pressed", btn.getAttribute("data-set-lang") === lang ? "true" : "false");
+        });
+        var group = document.querySelector(".lang");
+        if (group) group.setAttribute("aria-label", lang === "en" ? "Language" : "Idioma");
+        var nav = document.querySelector(".nav");
+        if (nav) nav.setAttribute("aria-label", lang === "en" ? "Sections" : "Seções");
+        if (persist) {
+          try { localStorage.setItem("soundsticker-lang", lang); } catch (e) {}
+        }
+      }
+      apply(current(), false);
+      document.querySelectorAll("[data-set-lang]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          apply(btn.getAttribute("data-set-lang"), true);
+        });
+      });
+
+      document.querySelectorAll(".copy").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var node = document.getElementById(btn.getAttribute("data-copy"));
+          var text = node ? node.textContent.trim() : "";
+          var done = function (ok) {
+            if (!ok) return;
+            btn.classList.add("is-copied");
+            window.setTimeout(function () { btn.classList.remove("is-copied"); }, 1600);
+          };
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function () { done(true); }).catch(function () { done(fallback(text)); });
+          } else {
+            done(fallback(text));
+          }
+        });
+      });
+      function fallback(text) {
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        var ok = false;
+        try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+        ta.remove();
+        return ok;
+      }
+
+      var dialog = document.getElementById("lightbox");
+      var lbImg = document.getElementById("lb-img");
+      var lbCap = document.getElementById("lb-cap");
+      document.querySelectorAll(".shot").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var img = btn.querySelector("img");
+          var cap = btn.parentElement && btn.parentElement.querySelector("figcaption");
+          lbImg.src = btn.getAttribute("data-full");
+          lbImg.alt = img ? img.alt : "";
+          lbCap.textContent = cap ? cap.innerText : "";
+          if (dialog.showModal) dialog.showModal();
+        });
+      });
+      document.getElementById("lb-close").addEventListener("click", function () {
+        dialog.close();
+      });
+      dialog.addEventListener("click", function (event) {
+        if (event.target === dialog) dialog.close();
+      });
+    })();
+  </script>
+</body>
+</html>
