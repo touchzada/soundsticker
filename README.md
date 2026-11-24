@@ -7,6 +7,8 @@ Local app to create and send **WhatsApp stickers with sound**.
 
 Criado por [@touchzada](https://x.com/touchzada) · [MIT License](LICENSE)
 
+Site: https://touchzada.github.io/soundsticker/
+
 <p align="center">
   <img src="docs/screens/01-inicial.png" width="280" alt="Tela inicial / Home">
   <img src="docs/screens/02-preparada.png" width="280" alt="Figurinha pronta / Sticker ready">
