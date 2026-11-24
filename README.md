@@ -119,7 +119,7 @@ You don't need to install Node or FFmpeg if you use the portable Windows package
 
 ### Site
 
-The project page is <https://touchzada.github.io/soundsticker/>. It goes live once GitHub Pages is enabled: **Settings → Pages → Deploy from branch `main` / `docs`**.
+The project page is <https://touchzada.github.io/soundsticker/>.
 
 ### Important warning
 
